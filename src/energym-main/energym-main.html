@@ -1,9 +1,45 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-app.html">
-<link rel="import" href="my-login.html">
-<link rel="import" href="my-profile.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="energym-exercise-selector.html"/>
+<link rel="import" href="redux-mixin.html"/>
+
 <dom-module id="energym-main">
     <template>
+        <style>
+            :host {
+                display: block;
+            }
+
+            .login {
+                max-width: 400px;
+                margin: auto;
+            }
+
+            #login {
+                width: 400px;
+                height: 400px;
+                text-align: center;
+                --paper-card-header-color: white;
+                color: white;
+                margin-top: 50px;
+                padding-top: 60px;
+                background-image: url("../../src/img/logo.PNG");
+                background-size: cover;
+            }
+
+            #main {
+                width: 400px;
+                text-align: center;
+            }
+
+            #login paper-button {
+                margin-top: 180px;
+            }
+        </style>
         <firebase-app
                 auth-domain="energym-f3107.firebaseapp.com"
                 database-url="https://energym-f3107.firebaseio.com"
@@ -11,7 +47,32 @@
                 storage-bucket="energym-f3107.appspot.com"
                 messaging-sender-id="991940411053">
         </firebase-app>
-        <my-login></my-login>
+        <firebase-auth
+                id="auth"
+                provider="google"
+                user="{{user}}">
+        </firebase-auth>
+
+        <!-- The 'main' screen, where all the components will go. -->
+        <template is="dom-if" if="[[user]]">
+            <paper-card id="main">
+                <div class="card-contents">
+                    <energym-exercise-selector></energym-exercise-selector>
+                </div>
+                <div class="card-actions">
+                    <paper-button raised on-tap="_handleLogout">Logout</paper-button>
+                </div>
+            </paper-card>
+        </template>
+
+        <!-- Login -->
+        <div class="login" hidden$="[[user]]">
+            <paper-card id="login" heading="Welcome to Energym" elevation="5">
+                <div class="card-contents">
+                    <paper-button raised on-tap="_handleLogin">Login with Google</paper-button>
+                </div>
+            </paper-card>
+        </div>
     </template>
 
     <script>
@@ -19,15 +80,29 @@
          * @customElement
          * @polymer
          */
-        class EnergymMain extends Polymer.Element {
+        class EnergymMain extends ReduxMixin(Polymer.Element) {
             static get is() { return 'energym-main'; }
+
             static get properties() {
+                return {};
+            }
+
+            static get actions() {
                 return {
-                    prop1: {
-                        type: String,
-                        value: 'energym-main'
+                    userChange(newUser) {
+                        return {type: "USER_CHANGED", payload: newUser};
                     }
-                };
+                }
+            }
+
+            _handleLogin() {
+                return this.$.auth.signInWithPopup().then(value => {
+                    this.dispatch('userChange', value.user);
+                });
+            }
+
+            _handleLogout() {
+                return this.$.auth.signOut();
             }
         }
 

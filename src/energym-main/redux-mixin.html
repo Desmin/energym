@@ -1,0 +1,25 @@
+<link rel="import" href="../../bower_components/polymer-redux/polymer-redux.html">
+<script src="../../node_modules/redux/dist/redux.js"></script>
+<script>
+    const initial = {user: undefined, workoutType: undefined, selectedExercise: undefined};
+    const reducer = (state = initial, action) => {
+        switch (action.type) {
+            case 'USER_CHANGED':
+                return Object.assign({}, state, {
+                    user: action.payload
+                });
+            case 'SELECTED_EXERCISE_CHANGED':
+                return Object.assign({}, state, {
+                    selectedExercise: action.payload
+                });
+            case 'SELECTED_WORKOUT_TYPE_CHANGED':
+                return Object.assign({}, state, {
+                    workoutType: action.payload
+                });
+            default:
+                return state;
+        }
+    };
+    const store = Redux.createStore(reducer);
+    ReduxMixin = PolymerRedux(store);
+</script>

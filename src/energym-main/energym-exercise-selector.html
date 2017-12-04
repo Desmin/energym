@@ -1,0 +1,92 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="redux-mixin.html"/>
+
+<dom-module id="energym-exercise-selector">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+
+            paper-icon-button.toggle {
+                width: 64px;
+                height: 64px;
+            }
+        </style>
+        <firebase-query id="test" path="/workouts/[[workoutType]]" data="{{data}}"></firebase-query>
+        <h2>Welcome, [[user.displayName]]!</h2>
+        <paper-card elevation="4">
+            <div class="card-actions">
+                <paper-icon-button on-tap="_toggleExerciseType" class="toggle"
+                                   src="../../src/img/running.png"></paper-icon-button>
+            </div>
+            <div class="card-contents">
+                [[data.metric]]
+            </div>
+        </paper-card>
+    </template>
+
+    <script>
+        let cardio = true;
+        /**
+         * `energym-exercise-selector`
+         * Allows a user to select an exercise to complete activities with.
+         *
+         * @customElement
+         * @polymer
+         * @demo demo/index.html
+         */
+        class EnergymExerciseSelector extends ReduxMixin(Polymer.Element) {
+            static get is() {
+                return 'energym-exercise-selector';
+            }
+
+            static get properties() {
+                return {
+                    workoutType: {
+                        type: String,
+                        statePath: 'workoutType'
+                    },
+                    selectedExercise: {
+                        type: String,
+                        value: undefined,
+                        observer: '_selectedExerciseChanged'
+                    },
+                    user: {
+                        type: Object,
+                        statePath: 'user'
+                    }
+                };
+            }
+
+            static get actions() {
+                return {
+                    workoutTypeChanged(type) {
+                        return {type: "SELECTED_WORKOUT_TYPE_CHANGED", payload: type};
+                    }
+                }
+            }
+
+            _selectedExerciseChanged(newValue, oldValue) {
+
+            }
+
+            _toggleExerciseType(ev) {
+                cardio = !cardio;
+                let image = cardio ? '../../src/img/running.png' : '../../src/img/strength.png';
+                Polymer.dom(ev.target).setAttribute('src', image);
+                this.dispatch('workoutTypeChanged', cardio ? 'cardio' : 'strength');
+                console.log(this.$.test);
+                console.log(this.workoutType);
+                console.log(this.$.test.data);
+            }
+        }
+
+        window.customElements.define(EnergymExerciseSelector.is, EnergymExerciseSelector);
+    </script>
+</dom-module>
