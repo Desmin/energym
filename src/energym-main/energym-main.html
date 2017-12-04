@@ -7,6 +7,8 @@
 <link rel="import" href="energym-exercise-selector.html"/>
 <link rel="import" href="redux-mixin.html"/>
 
+<script src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js"></script>
+
 <dom-module id="energym-main">
     <template>
         <style>
@@ -32,7 +34,7 @@
             }
 
             #main {
-                width: 400px;
+                width: 600px;
                 text-align: center;
             }
 
@@ -41,14 +43,16 @@
             }
         </style>
         <firebase-app
-                auth-domain="energym-f3107.firebaseapp.com"
-                database-url="https://energym-f3107.firebaseio.com"
-                api-key="AIzaSyAba7Ope6qbexf5lAeFAXVNISpX3ftymz0"
-                storage-bucket="energym-f3107.appspot.com"
-                messaging-sender-id="991940411053">
+                name="energym"
+                auth-domain="[[config.authDomain]]"
+                database-url="[[config.databaseURL]]"
+                api-key="[[config.apiKey]]"
+                storage-bucket="[[config.storageBucket]]"
+                messaging-sender-id="[[config.messageSenderId]]">
         </firebase-app>
         <firebase-auth
                 id="auth"
+                app-name="energym"
                 provider="google"
                 user="{{user}}">
         </firebase-auth>
@@ -76,6 +80,16 @@
     </template>
 
     <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyAba7Ope6qbexf5lAeFAXVNISpX3ftymz0",
+            authDomain: "energym-f3107.firebaseapp.com",
+            databaseURL: "https://energym-f3107.firebaseio.com",
+            projectId: "energym-f3107",
+            storageBucket: "energym-f3107.appspot.com",
+            messagingSenderId: "991940411053"
+        };
+        firebase.initializeApp(config);
         /**
          * @customElement
          * @polymer
@@ -84,7 +98,13 @@
             static get is() { return 'energym-main'; }
 
             static get properties() {
-                return {};
+                return {
+                    config: {
+                        type: Object,
+                        readOnly: true,
+                        value: function () { return config;}
+                    }
+                };
             }
 
             static get actions() {

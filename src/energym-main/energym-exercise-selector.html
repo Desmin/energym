@@ -4,6 +4,12 @@
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="redux-mixin.html"/>
 
 <dom-module id="energym-exercise-selector">
@@ -11,28 +17,70 @@
         <style>
             :host {
                 display: block;
+                max-width: 250px;
             }
 
             paper-icon-button.toggle {
                 width: 64px;
                 height: 64px;
             }
+
+            #workoutTypes {
+                width: 100%;
+            }
+
+            iron-list {
+                max-height: 150px;
+            }
+
+            iron-list paper-card {
+                width: 80%;
+                margin-top: 3px;
+            }
         </style>
-        <firebase-query id="test" path="/workouts/[[workoutType]]" data="{{data}}"></firebase-query>
+
+        <firebase-query id="cwt" path="workouts/cardio" data="{{cData}}"></firebase-query>
+        <firebase-query id="swt" path="workouts/strength" data="{{sData}}"></firebase-query>
+        <firebase-query id="userData" path="users/[[user.uid]]/workouts" data="{{userWorkouts}}"></firebase-query>
+
+        <paper-dialog id="addWorkoutType" modal on-iron-overlay-closed="_dialogClosed">
+            <div>
+                <paper-dropdown-menu label="Workouts">
+                    <paper-listbox slot="dropdown-content" selected="0">
+                        <template is="dom-repeat" items="[[data]]" as="workout">
+                            <paper-item>{{workout.$key}}</paper-item>
+                        </template>
+                    </paper-listbox>
+                </paper-dropdown-menu>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button dialog-confirm>Add</paper-button>
+            </div>
+        </paper-dialog>
+
         <h2>Welcome, [[user.displayName]]!</h2>
-        <paper-card elevation="4">
+        <paper-card id="workoutTypes" heading="[[workoutType]]" elevation="4">
             <div class="card-actions">
-                <paper-icon-button on-tap="_toggleExerciseType" class="toggle"
+                <paper-icon-button id="Cardio" on-tap="_toggleExerciseType" class="toggle"
                                    src="../../src/img/running.png"></paper-icon-button>
+                <paper-icon-button id="Strength" on-tap="_toggleExerciseType" class="toggle"
+                                   src="../../src/img/strength.png"></paper-icon-button>
             </div>
             <div class="card-contents">
-                [[data.metric]]
+                <paper-icon-button id="add" on-tap="_addNewWorkout" src="../../src/img/add.png"></paper-icon-button>
+                <iron-list selection-enabled selected-item="{{selectedWorkout}}" elevation="4" items="[[data]]" as="workout">
+                    <template>
+                        <div>
+                            <paper-card on-tap="_selectedExerciseChanged" heading="[[workout.$key]]"></paper-card>
+                        </div>
+                    </template>
+                </iron-list>
             </div>
         </paper-card>
     </template>
 
     <script>
-        let cardio = true;
         /**
          * `energym-exercise-selector`
          * Allows a user to select an exercise to complete activities with.
@@ -50,16 +98,20 @@
                 return {
                     workoutType: {
                         type: String,
-                        statePath: 'workoutType'
+                        value: 'Make A Selection'
                     },
                     selectedExercise: {
-                        type: String,
-                        value: undefined,
-                        observer: '_selectedExerciseChanged'
+                        type: Number,
+                        value: 0,
+                        nofity: true
                     },
                     user: {
                         type: Object,
                         statePath: 'user'
+                    },
+                    data: {
+                        type: Array,
+                        notify: true
                     }
                 };
             }
@@ -68,22 +120,37 @@
                 return {
                     workoutTypeChanged(type) {
                         return {type: "SELECTED_WORKOUT_TYPE_CHANGED", payload: type};
+                    },
+                    selectedExerciseChanged(type) {
+                        return {type: 'SELECTED_EXERCISE_CHANGED', payload: type};
                     }
                 }
             }
 
-            _selectedExerciseChanged(newValue, oldValue) {
+            _selectedExerciseChanged(ev) {
+                let exercise = ev.model.workout.$key;
+                console.log(exercise);
+                this.dispatch('selectedExerciseChanged', exercise);
+            }
 
+            _addNewWorkout() {
+                this.$.addWorkoutType.toggle();
+            }
+
+            _dialogClosed(ev) {
+                if (this.$.addWorkoutType.closingReason.confirmed) {
+                    console.log('Confirmed!');
+                    let type = Polymer.dom(ev).localTarget;
+                    console.log(type);
+                }
             }
 
             _toggleExerciseType(ev) {
-                cardio = !cardio;
-                let image = cardio ? '../../src/img/running.png' : '../../src/img/strength.png';
-                Polymer.dom(ev.target).setAttribute('src', image);
-                this.dispatch('workoutTypeChanged', cardio ? 'cardio' : 'strength');
-                console.log(this.$.test);
-                console.log(this.workoutType);
-                console.log(this.$.test.data);
+                let type = Polymer.dom(ev).localTarget.id;
+                this.workoutType = type;
+                this.dispatch('workoutTypeChanged', this.workoutType.toLowerCase());
+                let query = type === 'Cardio' ? this.$.cwt : this.$.swt;
+                this.data = query.data;
             }
         }
 
