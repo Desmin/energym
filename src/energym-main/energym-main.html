@@ -5,6 +5,7 @@
 <link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="energym-exercise-selector.html"/>
+<link rel="import" href="my-profile.html"/>
 <link rel="import" href="redux-mixin.html"/>
 
 <script src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js"></script>
@@ -43,18 +44,17 @@
             }
         </style>
         <firebase-app
-                name="energym"
-                auth-domain="[[config.authDomain]]"
-                database-url="[[config.databaseURL]]"
-                api-key="[[config.apiKey]]"
-                storage-bucket="[[config.storageBucket]]"
-                messaging-sender-id="[[config.messageSenderId]]">
+                auth-domain="energym-f3107.firebaseapp.com"
+                database-url="https://energym-f3107.firebaseio.com"
+                api-key="AIzaSyAba7Ope6qbexf5lAeFAXVNISpX3ftymz0"
+                storage-bucket="energym-f3107.appspot.com"
+                messaging-sender-id="991940411053">
         </firebase-app>
         <firebase-auth
                 id="auth"
-                app-name="energym"
                 provider="google"
                 user="{{user}}">
+        <!--app-name="energym"-->
         </firebase-auth>
 
         <!-- The 'main' screen, where all the components will go. -->
@@ -63,10 +63,17 @@
                 <div class="card-contents">
                     <energym-exercise-selector></energym-exercise-selector>
                 </div>
+
+                <paper-card>
+                    <p>My Profile</p>
+                    <my-profile></my-profile>
+                </paper-card>
+
                 <div class="card-actions">
                     <paper-button raised on-tap="_handleLogout">Logout</paper-button>
                 </div>
             </paper-card>
+
         </template>
 
         <!-- Login -->
@@ -81,15 +88,15 @@
 
     <script>
         // Initialize Firebase
-        var config = {
+        /*var config = {
             apiKey: "AIzaSyAba7Ope6qbexf5lAeFAXVNISpX3ftymz0",
             authDomain: "energym-f3107.firebaseapp.com",
             databaseURL: "https://energym-f3107.firebaseio.com",
             projectId: "energym-f3107",
             storageBucket: "energym-f3107.appspot.com",
             messagingSenderId: "991940411053"
-        };
-        firebase.initializeApp(config);
+        };*/
+        //firebase.initializeApp(config);
         /**
          * @customElement
          * @polymer
@@ -99,11 +106,11 @@
 
             static get properties() {
                 return {
-                    config: {
+                    /*config: {
                         type: Object,
                         readOnly: true,
                         value: function () { return config;}
-                    }
+                    }*/
                 };
             }
 
@@ -111,6 +118,9 @@
                 return {
                     userChange(newUser) {
                         return {type: "USER_CHANGED", payload: newUser};
+                    },
+                    userQueryLoaded(query) {
+                        return {type: 'USER_QUERY_CHANGED', payload: query};
                     }
                 }
             }
