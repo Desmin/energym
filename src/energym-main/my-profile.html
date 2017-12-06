@@ -81,10 +81,6 @@
                     }
                 };
             }
-            ready() {
-                super.ready();
-
-            }
 
             constructor() {
                 super();
@@ -92,7 +88,7 @@
 
             _dialogClosed(ev) {
                 if (this.$.profilePopUp.closingReason.confirmed) {
-                    this.$.proQuery.ref.set({
+                    this.$.proQuery.ref.update({
                         goalweight: this.$.goalweightval.value,
                         weight: this.$.weightval.value,
                         height: this.$.heightval.value

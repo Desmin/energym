@@ -1,7 +1,7 @@
 <link rel="import" href="../../bower_components/polymer-redux/polymer-redux.html">
 <script src="../../node_modules/redux/dist/redux.js"></script>
 <script>
-    const initial = {user: undefined, workoutType: undefined, selectedExercise: undefined};
+    const initial = {user: undefined, workoutType: 'Make A Selection', selectedExercise: 'Make A Selection'};
     const reducer = (state = initial, action) => {
         switch (action.type) {
             case 'USER_CHANGED':

@@ -1,4 +1,3 @@
-<link rel="import" href="../polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
@@ -15,6 +14,19 @@
         <style>
             :host {
                 display: block;
+                width: 400px;
+            }
+            iron-list paper-card {
+                width: 100%;
+                margin-top: 3px;
+                --paper-card-background-color: lightslategrey;
+            }
+            iron-list {
+                height: 200px;
+            }
+            #records {
+                margin-top: 10px;
+                width: 80%;
             }
         </style>
 
@@ -24,7 +36,7 @@
                 data="{{userData}}">
         </firebase-query>
 
-        <h1>[[selectedExercise]]</h1>
+        <p>Selected Exercise: [[selectedExercise]]</p>
         <label id="metricMeasure">Metric:</label>
         <paper-radio-group attr-for-selected="metric" selected="{{selectedRadioButton}}" aria-labelledby="metricMeasure">
             <paper-radio-button metric="reps">Reps</paper-radio-button>
@@ -33,25 +45,25 @@
         <paper-input id="measure" always-float-label label="Measurement"></paper-input>
         <paper-input id="date" always-float-label auto-validate pattern="^(\d{2}).\d{2}.(\d{4})$"
                      placeholder="MM/DD/YYYY" label="Date of Exercise"></paper-input>
-        <paper-button on-tap="_addNewRecord">Submit</paper-button>
+        <paper-button raised on-tap="_addNewRecord">Submit</paper-button>
 
-        <iron-list selection-enabled selected-item="{{selectedWorkout}}" selected="0" elevation="4" items="[[userData]]" as="workout">
-            <template>
-                <div>
-                    <paper-card heading="[[workout.Exercise]]">
-                        <div class="card-contents">
-                            [[workout.Date]]
-                            [[workout.Metric]]
-                            [[workout.Measure]]
-                        </div>
-                        <div class="card-actions">
-                            <paper-button on-tap="_removeSelectedWorkout">Remove</paper-button>
-                        </div>
-                    </paper-card>
-                </div>
-            </template>
-        </iron-list>
-
+        <paper-card id="records" heading="My Records" elevation="4">
+            <iron-list elevation="4" selection-enabled selected-item="{{selectedData}}" items="[[userData]]" as="workout">
+                <template>
+                    <div>
+                        <paper-card heading="[[workout.Exercise]]">
+                            <div class="card-contents">
+                                [[workout.Date]]
+                                <br>[[workout.Metric]]: [[workout.Measure]]
+                            </div>
+                            <div class="card-actions">
+                                <paper-button id="[[workout.$key" data-args="[[workout.$key]]" on-tap="_removeSelectedWorkout">Remove</paper-button>
+                            </div>
+                        </paper-card>
+                    </div>
+                </template>
+            </iron-list>
+        </paper-card>
     </template>
 
     <script>
@@ -71,24 +83,20 @@
                         type: String,
                         statePath: 'selectedExercise'
                     },
-                    selectedWorkout: {
-                        type: Object,
-                        value: undefined
-                    },
                     selectedRadioButton: {
                         type: String,
                         value: 'reps'
-
                     },
                     user: {
                         type: Object,
                         statePath: 'user'
+                    },
+                    selectedData: {
+                        type: Object
                     }
                 };
             }
             _addNewRecord() {
-                console.log(this.user.uid);
-                console.log(this.selectedExercise);
                 this.$.recordQuery.ref.push({
                     Date: this.$.date.value,
                     Exercise: this.selectedExercise,
@@ -97,9 +105,9 @@
                 });
             }
 
-            _removeSelectedWorkout() {
-                console.log(this.selectedWorkout);
-                this.$.recordQuery.ref.child(this.selectedWorkout.$key).set({});
+            _removeSelectedWorkout(e) {
+                let key = e.model.__data.workout.$key;
+                this.$.recordQuery.ref.child(key).set({});
             }
         }
 

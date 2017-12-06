@@ -10,8 +10,6 @@
 <link rel="import" href="redux-mixin.html"/>
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 
-<script src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js"></script>
-
 <dom-module id="energym-main">
     <template>
         <style include="iron-flex iron-flex-alignment"></style>
@@ -42,8 +40,7 @@
             }
 
             #main {
-                width: 600px;
-                height: 600px;
+                width: 850px;
                 padding: 5px;
                 text-align: center;
                 --paper-card-background-color: lightslategrey;
@@ -57,27 +54,29 @@
                 align-self: stretch;
                 --paper-card-background-color: silver;
             }
-            .card-actions{
+
+            .card-actions {
                 --paper-card-background-color: silver;
             }
-            .exercisecblock{
-                display:inline-block;
-            }
-            .card-contents .exercisecblock .exerciseselect{
-                width: 45%;
-                float: left;
+
+            .exercisecblock {
+                width: 100%;
                 display: inline-block;
-                padding-right: 5%;
             }
 
-            .card-contents .exercisecblock .record{
-                width: 45%;
+            .exercisecblock .exerciseselect {
+                width: 50%;
                 float: left;
                 display: inline-block;
+                padding-right: 5px;
             }
-            .card-contents .profile{
-                width: 100%;
-                padding-bottom: 30px;
+
+            .exercisecblock .record {
+                display: inline-block;
+            }
+
+            .profile {
+                padding-bottom: 5px;
             }
         </style>
         <firebase-app
@@ -96,13 +95,14 @@
 
         <!-- The 'main' screen, where all the components will go. -->
         <template is="dom-if" if="[[user]]">
-            <paper-card id="main">
+            <paper-card id="main" elevation="4">
                 <div class="card-contents">
                     <h2>Welcome, [[user.displayName]]!</h2>
-                    <div class="profile">
-                        <paper-card>
-                            <p>My Profile</p>
-                            <my-profile></my-profile>
+                    <div class="profile" elevation="4">
+                        <paper-card heading="My Profile">
+                            <div class="card-contents">
+                                <my-profile></my-profile>
+                            </div>
                         </paper-card>
                     </div>
                     <div class="exercisecblock">
@@ -110,9 +110,10 @@
                             <energym-exercise-selector></energym-exercise-selector>
                         </div>
                         <div class="record">
-                            <paper-card>
-                                <p>Add Record</p>
-                                <add-record></add-record>
+                            <paper-card heading="Add Record" elevation="4">
+                                <div class="card-contents">
+                                    <add-record></add-record>
+                                </div>
                             </paper-card>
                         </div>
                     </div>
@@ -163,6 +164,12 @@
                 return {
                     userChange(newUser) {
                         return {type: "USER_CHANGED", payload: newUser};
+                    },
+                    workoutTypeChanged(type) {
+                        return {type: "SELECTED_WORKOUT_TYPE_CHANGED", payload: type};
+                    },
+                    selectedExerciseChanged(type) {
+                        return {type: 'SELECTED_EXERCISE_CHANGED', payload: type};
                     }
                 }
             }
@@ -174,6 +181,7 @@
             }
 
             _handleLogout() {
+                location.reload();
                 return this.$.auth.signOut();
             }
         }
