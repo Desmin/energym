@@ -1,45 +1,108 @@
-<link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-auth-script.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
-<link rel="import" href="../../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
-<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-radio-button/paper-radio-button.html">
+<link rel="import" href="../../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="redux-mixin.html"/>
 
 <dom-module id="add-record">
     <template>
-        <paper-card>
-            <p></p>
-            <p>Time:</p>
-            <paper-input></paper-input>
-            <p>Date:</p>
-            <paper-input></paper-input>
-            <paper-button></paper-button>
-        </paper-card>
-    </template>
-    <script>
-        class AddRecord extends ReduxMixin(Polymer.Element){
-            static get is() {
-                return "add-record";
+        <style>
+            :host {
+                display: block;
             }
-            static get properties(){
+        </style>
+
+        <firebase-query
+                id="recordQuery"
+                path="users/[[user.uid]]/workouts"
+                data="{{userData}}">
+        </firebase-query>
+
+
+        <label id="metricMeasure">Metric:</label>
+        <paper-radio-group attr-for-selected="metric" selected="{{selectedRadioButton}}" aria-labelledby="metricMeasure">
+            <paper-radio-button metric="reps">Reps</paper-radio-button>
+            <paper-radio-button metric="time">Time</paper-radio-button>
+        </paper-radio-group>
+        <paper-input id="measure" always-float-label label="Measurement"></paper-input>
+        <paper-input id="date" always-float-label auto-validate pattern="^(\d{2}).\d{2}.(\d{4})$"
+                     placeholder="MM/DD/YYYY" label="Date of Exercise"></paper-input>
+        <paper-button on-tap="_addNewRecord">Submit</paper-button>
+
+        <iron-list selection-enabled selected-item="{{selectedWorkout}}" selected="0" elevation="4" items="[[userData]]" as="workout">
+            <template>
+                <div>
+                    <paper-card heading="[[workout.Exercise]]">
+                        <div class="card-contents">
+                            [[workout.Date]]
+                            [[workout.Metric]]
+                            [[workout.Measure]]
+                        </div>
+                        <div class="card-actions">
+                            <paper-button on-tap="_removeSelectedWorkout">Remove</paper-button>
+                        </div>
+                    </paper-card>
+                </div>
+            </template>
+        </iron-list>
+
+    </template>
+
+    <script>
+        /**
+         * `add-record`
+         *
+         *
+         * @customElement
+         * @polymer
+         * @demo demo/index.html
+         */
+        class AddRecord extends ReduxMixin(Polymer.Element) {
+            static get is() { return 'add-record'; }
+            static get properties() {
                 return {
+                    selectedExercise: {
+                        type: String,
+                        statePath: 'selectedExercise'
+                    },
+                    selectedWorkout: {
+                        type: Object,
+                        value: undefined
+                    },
+                    selectedRadioButton: {
+                        type: String,
+                        value: 'reps'
+
+                    },
                     user: {
                         type: Object,
                         statePath: 'user'
                     }
                 };
             }
-            constructor() {
-                super();
+            _addNewRecord() {
+                console.log(this.user.uid);
+                console.log(this.selectedExercise);
+                this.$.recordQuery.ref.push({
+                    Date: this.$.date.value,
+                    Exercise: this.selectedExercise,
+                    Metric: this.selectedRadioButton,
+                    Measure: this.$.measure.value
+                });
             }
 
+            _removeSelectedWorkout() {
+                console.log(this.selectedWorkout);
+                this.$.recordQuery.ref.child(this.selectedWorkout.$key).set({});
+            }
         }
-        customElements.define(AddRecord.is, AddRecord);
+
+        window.customElements.define(AddRecord.is, AddRecord);
     </script>
 </dom-module>
