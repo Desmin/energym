@@ -61,6 +61,7 @@
         <template is="dom-if" if="[[user]]">
             <paper-card id="main">
                 <div class="card-contents">
+                    <h2>Welcome, [[user.displayName]]!</h2>
                     <energym-exercise-selector></energym-exercise-selector>
                 </div>
 
@@ -105,22 +106,13 @@
             static get is() { return 'energym-main'; }
 
             static get properties() {
-                return {
-                    /*config: {
-                        type: Object,
-                        readOnly: true,
-                        value: function () { return config;}
-                    }*/
-                };
+                return {};
             }
 
             static get actions() {
                 return {
                     userChange(newUser) {
                         return {type: "USER_CHANGED", payload: newUser};
-                    },
-                    userQueryLoaded(query) {
-                        return {type: 'USER_QUERY_CHANGED', payload: query};
                     }
                 }
             }

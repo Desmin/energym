@@ -39,36 +39,17 @@
             }
         </style>
 
-        <firebase-query id="cwt" path="workouts/cardio" data="{{cData}}"></firebase-query>
-        <firebase-query id="swt" path="workouts/strength" data="{{sData}}"></firebase-query>
-        <firebase-query id="userData" path="users/[[user.uid]]/workouts" data="{{userWorkouts}}"></firebase-query>
+        <firebase-query id="cData" path="workouts/cardio"></firebase-query>
+        <firebase-query id="sData" path="workouts/strength"></firebase-query>
 
-        <paper-dialog id="addWorkoutType" modal on-iron-overlay-closed="_dialogClosed">
-            <div>
-                <paper-dropdown-menu label="Workouts">
-                    <paper-listbox slot="dropdown-content" selected="0">
-                        <template is="dom-repeat" items="[[data]]" as="workout">
-                            <paper-item>{{workout.$key}}</paper-item>
-                        </template>
-                    </paper-listbox>
-                </paper-dropdown-menu>
-            </div>
-            <div class="buttons">
-                <paper-button dialog-dismiss>Cancel</paper-button>
-                <paper-button dialog-confirm>Add</paper-button>
-            </div>
-        </paper-dialog>
-
-        <h2>Welcome, [[user.displayName]]!</h2>
         <paper-card id="workoutTypes" heading="[[workoutType]]" elevation="4">
             <div class="card-actions">
-                <paper-icon-button id="Cardio" on-tap="_toggleExerciseType" class="toggle"
+                <paper-icon-button noink id="Cardio" on-tap="_toggleExerciseType" class="toggle"
                                    src="../../src/img/running.png"></paper-icon-button>
-                <paper-icon-button id="Strength" on-tap="_toggleExerciseType" class="toggle"
+                <paper-icon-button noink id="Strength" on-tap="_toggleExerciseType" class="toggle"
                                    src="../../src/img/strength.png"></paper-icon-button>
             </div>
             <div class="card-contents">
-                <paper-icon-button id="add" on-tap="_addNewWorkout" src="../../src/img/add.png"></paper-icon-button>
                 <iron-list selection-enabled selected-item="{{selectedWorkout}}" elevation="4" items="[[data]]" as="workout">
                     <template>
                         <div>
@@ -100,11 +81,6 @@
                         type: String,
                         value: 'Make A Selection'
                     },
-                    selectedExercise: {
-                        type: Number,
-                        value: 0,
-                        notify: true
-                    },
                     user: {
                         type: Object,
                         statePath: 'user'
@@ -133,23 +109,11 @@
                 this.dispatch('selectedExerciseChanged', exercise);
             }
 
-            _addNewWorkout() {
-                this.$.addWorkoutType.toggle();
-            }
-
-            _dialogClosed(ev) {
-                if (this.$.addWorkoutType.closingReason.confirmed) {
-                    console.log('Confirmed!');
-                    let type = Polymer.dom(ev).localTarget;
-                    console.log(type);
-                }
-            }
-
             _toggleExerciseType(ev) {
                 let type = Polymer.dom(ev).localTarget.id;
                 this.workoutType = type;
                 this.dispatch('workoutTypeChanged', this.workoutType.toLowerCase());
-                let query = type === 'Cardio' ? this.$.cwt : this.$.swt;
+                let query = type === 'Cardio' ? this.$.cData : this.$.sData;
                 this.data = query.data;
             }
         }
